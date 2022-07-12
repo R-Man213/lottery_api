@@ -8,8 +8,5 @@ public class LotteryApiApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(LotteryApiApplication.class, args);
-		LotteryService lotteryService = new LotteryService();
-		lotteryService.getGames().stream().forEach((s) -> System.out.println(s));
 	}
-
 }

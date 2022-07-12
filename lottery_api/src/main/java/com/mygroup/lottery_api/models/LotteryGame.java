@@ -1,14 +1,20 @@
 package com.mygroup.lottery_api.models;
 
+import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+@Entity
 public class LotteryGame {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private long gameId;
     private String gameName;
     private int price;
+    @ElementCollection
     private List<Integer> rewards;
+    @ElementCollection
     private List<Integer> winsRemaining;
     private String startDate;
 

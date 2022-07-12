@@ -7,6 +7,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -18,13 +19,17 @@ import java.util.List;
 @Service
 public class LotteryService {
 
-    private List<LotteryGame> games = new ArrayList<>();
+    private static boolean initialWebScrape = false;
+
+    @Autowired
+    private LotteryRepository lotteryRepository;
 
     public List<LotteryGame> getGames() {
-        webScrape();
-        return games;
+        if (!initialWebScrape) {
+            webScrape();
+        }
+        return lotteryRepository.findAll();
     }
-
 
     //Scrapes all active games from PA Lottery
     private void webScrape() {
@@ -99,14 +104,15 @@ public class LotteryService {
                 String value = (String)javascriptExecutor.executeScript("return document.evaluate(\"/html/body/div[2]/div/div[2]/div[1]/div[4]/div/div/blockquote/h4/center\", document, null, XPathResult.STRING_TYPE, null ).stringValue;");
                 lotteryGame.setStartDate(extractDate(value));
 
-                games.add(lotteryGame);
+                //games.add(lotteryGame);
+                lotteryRepository.save(lotteryGame);
                 driver.close();
                 driver.switchTo().window(originalWindow);
             }
 
             nextButton.click();
         }
-
+        initialWebScrape = true;
         driver.quit();
     }
 
