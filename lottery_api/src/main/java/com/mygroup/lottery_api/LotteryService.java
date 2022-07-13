@@ -8,24 +8,38 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 @Service
 public class LotteryService {
 
-    private static boolean initialWebScrape = false;
-
+    private static RepoStatus repoStatus = RepoStatus.NOT_USED;
     @Autowired
     private LotteryRepository lotteryRepository;
 
+    public RepoStatus getRepoStatus() {
+        return repoStatus;
+    }
+
+    //Make sure the app starts web-scraping on startup
+    @EventListener
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        webScrape();
+    }
+
     public List<LotteryGame> getGames() {
-        if (!initialWebScrape) {
+        if (repoStatus.equals(RepoStatus.NOT_USED)) {
             webScrape();
         }
         return lotteryRepository.findAll();
@@ -33,6 +47,7 @@ public class LotteryService {
 
     //Scrapes all active games from PA Lottery
     private void webScrape() {
+        repoStatus = RepoStatus.IN_USE;
         WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver();
 
@@ -112,11 +127,10 @@ public class LotteryService {
 
             nextButton.click();
         }
-        initialWebScrape = true;
+
         driver.quit();
+        repoStatus = RepoStatus.READY;
     }
-
-
 
     //Takes the web-scraped date info and converts it into YYYY-MM-DD format
     private String extractDate(String bulletinInfo) {
@@ -140,4 +154,10 @@ public class LotteryService {
         return localDate.toString();
 
     }
+}
+
+enum RepoStatus {
+    NOT_USED,   //only when first starting the application
+    IN_USE,
+    READY
 }
