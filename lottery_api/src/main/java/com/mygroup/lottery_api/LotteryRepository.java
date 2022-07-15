@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface LotteryRepository extends JpaRepository<LotteryGame, Long> {
-
+    List<LotteryGame> findByPriceEqualsOrderByGameId(int price);
 }

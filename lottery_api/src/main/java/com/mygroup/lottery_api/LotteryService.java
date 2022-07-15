@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,8 @@ public class LotteryService {
         webScrape();
     }
 
+    //Section for controller to repo mappings
+//---------------------------------------------------------------
     public List<LotteryGame> getGames() {
         if (repoStatus.equals(RepoStatus.NOT_USED)) {
             webScrape();
@@ -45,6 +48,33 @@ public class LotteryService {
         return lotteryRepository.findAll();
     }
 
+    public List<LotteryGame> refreshGames() {
+        lotteryRepository.deleteAll();
+        webScrape();
+        return lotteryRepository.findAll();
+    }
+
+    public List<LotteryGame> getByPrice(int price) {
+        if (repoStatus.equals(RepoStatus.NOT_USED)) {
+            webScrape();
+        }
+        return lotteryRepository.findByPriceEqualsOrderByGameId(price);
+    }
+
+    public List<LotteryGame> getByDateDesc() {
+        if (repoStatus.equals(RepoStatus.NOT_USED)) {
+            webScrape();
+        }
+        return lotteryRepository.findAll(Sort.by(Sort.Direction.DESC, "startDate"));
+    }
+
+    public List<LotteryGame> getByDateAsc() {
+        if (repoStatus.equals(RepoStatus.NOT_USED)) {
+            webScrape();
+        }
+        return lotteryRepository.findAll(Sort.by(Sort.Direction.ASC, "startDate"));
+    }
+//---------------------------------------------------------------
     //Scrapes all active games from PA Lottery
     private void webScrape() {
         repoStatus = RepoStatus.IN_USE;
