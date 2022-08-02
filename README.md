@@ -5,7 +5,7 @@ A Lottery API created using Spring Boot and Selenium
 This program first scrapes the active games section of the PA state lottery (https://www.palottery.state.pa.us/Scratch-Offs/Active-Games.aspx) using Selenium (Chrome browser is required). Each game is stored in a SQL database and is converted to a JSON response depending on the GET request.
 
 ## Current Requests
-### All of these requests should be directed too localhost:8080
+### All of these requests should be directed to localhost:8080
 * /allGames
   * Type: GET
   * Usage: Returns all the active games
